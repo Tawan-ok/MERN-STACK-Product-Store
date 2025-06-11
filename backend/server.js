@@ -75,7 +75,11 @@ if(!mongoose.Types.ObjectId.isValid(id)) {
   }
 });
 
-app.listen(5000, () => {
-  connectDB();
-  console.log('Server is running on port 5000');
-});
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(5000, () => {
+    connectDB();
+    console.log('Server is running on port 5000');
+  });
+}
+
+export default app;
