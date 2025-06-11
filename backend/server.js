@@ -1,24 +1,32 @@
 import express from 'express';
-import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import connectDB from './config/db.js';
+import Product from './model/product.model.js';
 
 dotenv.config();
 
 const app = express();
 
-const mongoUri =
-  process.env.MONGO_URI ||
-  'mongodb://root:example@localhost:27017/productStore?authSource=admin';
+app.use(express.json());
 
-mongoose
-  .connect(mongoUri)
-  .then(() => console.log('Connected to MongoDB'))
-  .catch((err) => console.error('MongoDB connection error:', err));
+app.post('/api/products', async (req, res) => {
+  const product = req.body; 
 
-app.get('/', (req, res) => {
-  res.send('Hello World');
+  if (!product.name || !product.price || !product.image) {
+    return res.status(400).json({ message: 'All fields are required' });
+  }
+  
+  const newProduct = new Product(product);
+
+  try {
+    await newProduct.save();
+    res.status(201).json(newProduct);
+  } catch (error) {
+    res.status(500).json({ message: 'Error creating product' });
+  }
 });
 
 app.listen(5000, () => {
+  connectDB();
   console.log('Server is running on port 5000');
 });
